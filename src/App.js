@@ -147,6 +147,8 @@ function App() {
       home: 0,
       away: 0
     })
+    setInning(0)
+    setOuts(0)
   }
   return (
     <div className="App">
