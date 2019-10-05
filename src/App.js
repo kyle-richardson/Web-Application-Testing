@@ -13,13 +13,10 @@ function App() {
     home: 0,
     away: 0
   })
-  const [runners, setRunners] = useState({
-    first: false,
-    second: false,
-    third: false
-  })
+  const [runners, setRunners] = useState([null,null,null])
   const [outs, setOuts] = useState(0)
-  const [homeTeamAtBat, setHomeTeamAtBat] = useState(true)
+  const [inning, setInning] = useState(1)
+  const [homeTeamAtBat, setHomeTeamAtBat] = useState(false)
   let foulAndStrike = false
 
   useEffect(()=>{
@@ -32,9 +29,9 @@ function App() {
 
   const throwBall = () => {
     const typeArray= ['strikes', 'balls', 'fouls', 'hit']
-    const selector = Math.floor(Math.random()*3)
+    const selector = Math.floor(Math.random()*4)
     const type = typeArray[selector]
-    if(selector===4){
+    if(selector===3){
       hit()
     }
     else if (selector===0 && atBatStats.strikes===2){
@@ -62,21 +59,29 @@ function App() {
     
   }
   const throwOut = () =>{
-    console.log("thrown out")
+    console.log("Three Strikes; You're OUT!")
     resetStats()
     setOuts(outs+1)
   }
   const walk = () => {
-    console.log("walked")
-    updateRunners(1)
+    console.log("Walked")
+    updateRunners(1, true)
     resetStats()
   }
   const hit = ()=> {
-    const num = 2
-    updateRunners(num)
+    const num = Math.floor(Math.random()*5)+1
+    if(num===5) {
+      console.log("Pop fly, caught. OUT")
+      setOuts(outs+1)
+    }
+    else {
+      console.log(num===4 ? "Home run!" : `${num} base hit!`)
+      updateRunners(num)
+    }
+    resetStats()
+    
   }
   const resetStats = () => {
-    console.log("resetting stats")
     setAtBatStats({
       strikes: 0,
       balls: 0,
@@ -84,16 +89,76 @@ function App() {
     })
   }
   const nextInning = () => {
-    setOuts(0)
-    setHomeTeamAtBat(!homeTeamAtBat)
+    if(inning>=9 && scores.home!==scores.away){
+      gameEnd()
+    }
+    else {
+      setOuts(0)
+      homeTeamAtBat && setInning(inning+1)
+      setHomeTeamAtBat(!homeTeamAtBat)
+    }
   }
-  const updateRunners= (bases)=> {
-    console.log("updating runner positions")
+  const updateRunners= (bases, walked=false)=> {
+    const shadowRunners = runners
+    let runsIn = 0
+    if(walked){
+      let emptyBase=null
+      for(let y=0;y<bases;y++){
+        if (shadowRunners[y]===null){
+          emptyBase=y
+          shadowRunners[y]='runner'
+          break
+        }
+      }
+      if(!emptyBase) {
+        runsIn++
+      }
+    }
+    else {
+      for(let x=0; x<bases; x++){
+        x===0 ? shadowRunners.unshift('runner') : shadowRunners.unshift(null)
+        const home = shadowRunners.pop()
+        if(home==='runner') {
+          runsIn++
+        }
+      }
+    }
+    console.log(shadowRunners)
+    runsIn && runs(runsIn)
+    setRunners(()=>shadowRunners)
+
+  }
+  const runs=(num)=> {
+    
+    let team = 'home'
+    if(!homeTeamAtBat) team='away'
+    console.log(`${num} run(s) in for ${team} team`)
+    setScores({
+      ...scores,
+      [team]: scores[team]+num
+    })
+  }
+  const gameEnd = ()=> {
+    let winner = ''
+    scores.home>scores.away ? winner='Home' : winner='Away'
+    alert(`${winner} team wins with a final score of ${scores.home} to ${scores.away}`)
+    resetStats()
+    setScores({
+      home: 0,
+      away: 0
+    })
   }
   return (
     <div className="App">
-      <Display throwBall = {throwBall} scores = {scores}/>
-      <Dashboard atBatStats = {atBatStats} outs = {outs}/>
+      <Display 
+        scores = {scores} 
+        inning={inning} 
+        homeTeamAtBat={homeTeamAtBat}
+        runners={runners}/>
+      <Dashboard 
+        throwBall = {throwBall} 
+        atBatStats = {atBatStats} 
+        outs = {outs}/>
     </div>
   );
 }

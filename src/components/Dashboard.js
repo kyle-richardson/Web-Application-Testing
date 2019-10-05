@@ -9,6 +9,17 @@ const Dashboard = (props) => {
             <p>strikes: {strikes}</p>
             <p>balls: {balls}</p>
             <p>fouls: {fouls}</p>
+            <div 
+                onClick={props.throwBall} 
+                style={{
+                    border: '1px solid black', 
+                    width: '150px', 
+                    margin: '0 auto',
+                    position: 'absolute',
+                    left: '10%',
+                    top: '20%'}}>
+                Throw ball
+            </div>
         </div>
     )
 }
