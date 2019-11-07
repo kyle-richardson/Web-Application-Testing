@@ -13,6 +13,7 @@ function App() {
     home: 0,
     away: 0
   })
+  const [message, setMessage] = useState('')
   const [runners, setRunners] = useState([null,null,null])
   const [outs, setOuts] = useState(0)
   const [inning, setInning] = useState(1)
@@ -29,7 +30,7 @@ function App() {
 
   const throwBall = () => {
     const typeArray= ['strikes', 'balls', 'fouls', 'hit']
-    const selector = Math.floor(Math.random()*4)
+    const selector = Math.floor(Math.random()*5)
     const type = typeArray[selector]
     if(selector===3){
       hit()
@@ -59,11 +60,13 @@ function App() {
     
   }
   const throwOut = () =>{
+    setMessage("Three Strikes; You're OUT!")
     console.log("Three Strikes; You're OUT!")
     resetStats()
     setOuts(outs+1)
   }
   const walk = () => {
+    setMessage('Walked')
     console.log("Walked")
     updateRunners(1, true)
     resetStats()
@@ -71,10 +74,12 @@ function App() {
   const hit = ()=> {
     const num = Math.floor(Math.random()*5)+1
     if(num===5) {
+      setMessage("Pop fly, caught. OUT")
       console.log("Pop fly, caught. OUT")
       setOuts(outs+1)
     }
     else {
+      setMessage(num===4 ? "Home run!" : `${num} base hit!`)
       console.log(num===4 ? "Home run!" : `${num} base hit!`)
       updateRunners(num)
     }
@@ -123,7 +128,7 @@ function App() {
         }
       }
     }
-    console.log(shadowRunners)
+    // console.log(shadowRunners)
     runsIn && runs(runsIn)
     setRunners(()=>shadowRunners)
 
@@ -132,6 +137,7 @@ function App() {
     
     let team = 'home'
     if(!homeTeamAtBat) team='away'
+    setMessage(`${num} run(s) in for ${team} team`)
     console.log(`${num} run(s) in for ${team} team`)
     setScores({
       ...scores,
@@ -156,7 +162,8 @@ function App() {
         scores = {scores} 
         inning={inning} 
         homeTeamAtBat={homeTeamAtBat}
-        runners={runners}/>
+        runners={runners}
+        message={message}/>
       <Dashboard 
         throwBall = {throwBall} 
         atBatStats = {atBatStats} 
